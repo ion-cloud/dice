@@ -1,0 +1,27 @@
+{
+  "name": "@ion-cloud/dice",
+  "version": "1.0.0",
+  "description": "Take a complex dice string and compute results based on it",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ion-cloud/dice.git"
+  },
+  "keywords": [
+    "javascript",
+    "ion-cloud",
+    "game-dev",
+    "dnd",
+    "random",
+    "procedural"
+  ],
+  "author": "NathanielInman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ion-cloud/dice/issues"
+  },
+  "homepage": "https://github.com/ion-cloud/dice#readme"
+}
