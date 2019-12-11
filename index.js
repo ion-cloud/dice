@@ -1,34 +1,94 @@
+function randomInteger(min,max){
+  return Math.floor(Math.random()*(max-min))+min;
+} //end randomInteger()
+
+class Die{
+  constructor(number,sides){
+    this.number = parseInt(number,10);
+    this.sides = parseInt(sides,10);
+  }
+}
+class Statement{
+  constructor(operatorString,operationString){
+    this.type = operatorString==='+'?'add':'subtract';
+    this.string = operationString;
+    if(this.string.includes('d')){
+      this.die = new Die(...operationString.split('d'));
+    }else{
+      this.constant = parseInt(this.string);
+    } //end if
+  }
+  get min(){
+    return this.die?this.die.number:this.constant;
+  }
+  get max(){
+    return this.die?this.die.number*this.die.sides:this.constant;
+  }
+}
+
 // Using #d# and # and the operators + and -, any statement string. Ex:
 // 3d8+23-2d4
 export class Dice{
-  constructor(damageString){
-    this.string = damageString;
+  constructor(diceString){
+    this.string = diceString;
     this.compileStatements();
   }
   compileStatements(){
     let splitString = this.string.split(/(\+|\-)/g),
-        filteredOperations = splitString.filter(s=>!['+','-'].includes(s)),
-        filteredOperators = splitString.filter(s=>['+','-'].includes(s));
+        operations = splitString.filter(s=>!['+','-'].includes(s)),
+        operators = splitString.filter(s=>['+','-'].includes(s));
 
-    this.statements = [];
-    filteredOperators.unshift('+'); //first roll is always additive
-    filteredOperations.forEach((s,i)=>{
-      this.statements.push({
-        operator: filteredOperators[i],
-        operation: filteredOperations[i]
-      });
+    operators.unshift('+'); //first roll is always additive
+    return this.statements = operations.reduce((result,statement,i)=>{
+      return [
+        ...result,
+        new Statement(operators[i],operations[i])
+      ];
+    },[]);
+  }
+  add(diceString){
+    const operator = diceString.includes('-')?'-':'+';
+
+    this.string = `${this.string}${operator}${diceString.replace(/\-|\+/g,'')}`;
+    this.compileStatements();
+    this.simplify();
+  }
+  subtract(diceString){
+    this.add(`-${diceString}`);
+  }
+  simplify(){
+    const diceTypes = {};
+
+    this.statements.forEach(statement=>{
+      if(statement.die){
+        const {die} = statement;
+
+        if(!diceTypes[die.sides]){
+          diceTypes[die.sides] = die.number*(statement.type==='add'?1:-1);
+        }else{
+          diceTypes[die.sides] += die.number*(statement.type==='add'?1:-1);
+        } //end if
+      }else if(!diceTypes[0]){
+        diceTypes[0] = statement.constant*(statement.type==='add'?1:-1);
+      }else{
+        diceTypes[0] += statement.constant*(statement.type==='add'?1:-1);
+      } //end if
     });
-    return this.statements;
+    this.string = Object.keys(diceTypes)
+      .reduce((result,sides,i)=>{
+        if(i!==0) result+=diceTypes[sides]>=0?'+':'-';
+        if(sides==='0'){
+          return result+Math.abs(diceTypes[sides]); //implicit type coercion to string
+        } //end if
+        return result+`${Math.abs(diceTypes[sides])}d${sides}`;
+      },'');
+    this.compileStatements();
   }
   get min(){
     let result = 0;
 
     this.statements.forEach(statement=>{
-      if(statement.operator==='+'){
-        result+=minOperation(statement.operation);
-      }else{
-        result-=minOperation(statement.operation);
-      }
+      result+=(statement.type==='add'?1:-1)*statement.min;
     });
     return result;
   }
@@ -36,48 +96,19 @@ export class Dice{
     let result = 0;
 
     this.statements.forEach(statement=>{
-      if(statement.operator==='+'){
-        result+=maxOperation(statement.operation);
-      }else{
-        result-=maxOperation(statement.operation);
-      } //end if
+      result+=(statement.type==='add'?1:-1)*statement.max;
     });
     return result;
-  }
-  randomInteger(min,max){
-    return Math.floor(Math.random()*(max-min))+min;
   }
   roll(){
     let result = 0;
 
     this.statements.forEach(statement=>{
-      let min = minOperation(statement.operation),
-          max = maxOperation(statement.operation);
+      let {min,max} = statement;
 
-      if(statement.operator==='+'){
-        result+=this.randomInteger(min,max);
-      }else{
-        result-=this.randomInteger(min,max);
-      } //end if
+      result+=(statement.type==='add'?1:-1)*randomInteger(min,max);
     });
     return result;
   }
 }
 
-function minOperation(operation){
-  let splitString = operation.split(/d/g);
-
-  return +splitString[0];
-} //end minOperation()
-
-function maxOperation(operation){
-  let splitString = operation.split(/d/g),
-      result = 0;
-
-  if(splitString.length>1){
-    result = splitString[0]*splitString[1]; //#d#
-  }else{
-    result = +splitString[0]; //#
-  } //end if
-  return result;
-} //end maxOperation()
