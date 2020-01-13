@@ -80,7 +80,11 @@ export class Dice{
   addNext(diceString){
     const operator = diceString.includes('-')?'-':'+';
 
-    this.stringNext = `${this.stringNext}${operator}${diceString.replace(/\-|\+/g,'')}`;
+    if(this.stringNext.length){
+      this.stringNext = `${this.stringNext}${operator}${diceString.replace(/\-|\+/g,'')}`;
+    }else{
+      this.stringNext = diceString;
+    } //end if
     this.statementsNext = compileStatements(this.stringNext);
     const simplifiedString = simplify(this.statementsNext);
 

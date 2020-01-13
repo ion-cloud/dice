@@ -33,6 +33,7 @@ main
 <script>
 import {Dice} from '../../index';
 
+window.Dice = Dice; //we allow user to play with Dice library in console
 export default {
   name: 'app',
   created(){
