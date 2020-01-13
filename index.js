@@ -14,17 +14,17 @@ function simplify(statements){
       }else{
         diceTypes[die.sides] += die.number*(statement.type==='add'?1:-1);
       } //end if
-    }else if(!diceTypes[0]){
-      diceTypes[0] = statement.constant*(statement.type==='add'?1:-1);
+    }else if(!diceTypes.constant){
+      diceTypes.constant = statement.constant*(statement.type==='add'?1:-1);
     }else{
-      diceTypes[0] += statement.constant*(statement.type==='add'?1:-1);
+      diceTypes.constant += statement.constant*(statement.type==='add'?1:-1);
     } //end if
   });
   return Object.keys(diceTypes)
     .reduce((result,sides,i)=>{
       if(i!==0) result+=diceTypes[sides]>=0?'+':'-';
-      if(sides==='0'){
-        return result+Math.abs(diceTypes[sides]); //implicit type coercion to string
+      if(sides==='constant'){
+        return result+Math.abs(diceTypes.constant); //implicit type coercion to string
       } //end if
       return result+`${Math.abs(diceTypes[sides])}d${sides}`;
     },'');
@@ -86,9 +86,8 @@ export class Dice{
       this.stringNext = diceString;
     } //end if
     this.statementsNext = compileStatements(this.stringNext);
-    const simplifiedString = simplify(this.statementsNext);
-
-    this.statementsNext = compileStatements(simplifiedString);
+    this.stringNext = simplify(this.statementsNext);
+    this.statementsNext = compileStatements(this.stringNext);
   }
   subtractNext(diceString){
     this.addNext(`-${diceString}`);
@@ -98,9 +97,8 @@ export class Dice{
 
     this.string = `${this.string}${operator}${diceString.replace(/\-|\+/g,'')}`;
     this.statements = compileStatements(this.string);
-    const simplifiedString = simplify(this.statements);
-
-    this.statementsNext = compileStatements(simplifiedString);
+    this.string = simplify(this.statements);
+    this.statements = compileStatements(this.string);
   }
   subtract(diceString){
     this.add(`-${diceString}`);
