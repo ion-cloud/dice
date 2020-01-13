@@ -1,6 +1,6 @@
 {
   "name": "@ion-cloud/dice",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Take a complex dice string and compute results based on it",
   "main": "index.js",
   "scripts": {
