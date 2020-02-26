@@ -89,27 +89,29 @@ export class Dice{
     } //end if
   }
   addNext(diceString){
-    const operator = diceString.slice(0,1)==='-'?'-':'+';
-
-    this.stringNext = `${this.stringNext}${operator}${diceString}`;
+    this.stringNext = `${this.stringNext}${['-','+'].includes(diceString.slice(0,1))?'':'+'}${diceString}`;
     this.statementsNext = compileStatements(this.stringNext);
     this.stringNext = simplify(this.statementsNext);
     this.statementsNext = compileStatements(this.stringNext);
   }
   subtractNext(diceString){
-    this.addNext(`-${diceString}`);
+
+    // if we're subtracting a statement then we just perform an inverse
+    // of the statement
+    this.addNext(`-${diceString.replace(/[-+]/g,c=> c==='-'?'+':'-')}`);
   }
   add(diceString){
-    const operator = diceString.includes('-')?'-':'+';
-
-    this.string = `${this.string}${operator}${diceString}`;
+    this.string = `${this.string}${['-','+'].includes(diceString.slice(0,1))?'':'+'}${diceString}`;
     this.statements = compileStatements(this.string);
     this.string = simplify(this.statements);
     this.statements = compileStatements(this.string);
     this.addNext(diceString); //reflect base changes to next roll as well
   }
   subtract(diceString){
-    this.add(`-${diceString}`);
+
+    // if we're subtracting a statement then we just perform an inverse
+    // of the statement
+    this.add(`-${diceString.replace(/[-+]/g,c=> c==='-'?'+':'-')}`);
   }
   get min(){
     let result = 0;
