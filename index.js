@@ -22,7 +22,8 @@ function simplify(statements){
   });
   return Object.keys(diceTypes)
     .reduce((result,sides,i)=>{
-      if(i!==0) result+=diceTypes[sides]>=0?'+':'-';
+      if(diceTypes[sides]===0) return result; //skip 0dx or +0
+      result+=diceTypes[sides]>=0?'+':'-';
       if(sides==='constant'){
         return result+Math.abs(diceTypes.constant); //implicit type coercion to string
       } //end if
@@ -31,11 +32,12 @@ function simplify(statements){
 } //end simplify()
 
 function compileStatements(diceString){
-  let splitString = diceString.split(/(\+|\-)/g),
-      operations = splitString.filter(s=>!['+','-'].includes(s)),
+  let splitString = diceString.split(/(\+|\-)/g).filter(s=>s.length),
+      operations = splitString.filter(s=>!['+','-'].includes(s)).filter(s=>s.length),
       operators = splitString.filter(s=>['+','-'].includes(s));
 
-  operators.unshift('+'); //first roll is always additive
+  //sometimes the first operation isn't declared explicitly
+  if(!['+','-'].includes(splitString[0])) operators.unshift('+');
   return operations.reduce((result,statement,i)=>{
     return [
       ...result,
@@ -71,20 +73,25 @@ class Statement{
 // Using #d# and # and the operators + and -, any statement string. Ex:
 // 3d8+23-2d4
 export class Dice{
-  constructor(diceString='',stringNext=''){
-    this.string = diceString;
-    this.stringNext = stringNext;
+  constructor(diceString='',diceStringNext=''){
+    this.statements = compileStatements(diceString);
+    this.string = simplify(this.statements);
     this.statements = compileStatements(this.string);
-    if(stringNext) this.statementsNext = compileStatements(this.stringNext);
+
+    // by default if no additional operations will perform on next computation
+    // then we will assume the instances basic string and statements
+    this.stringNext = this.string;
+    this.statementsNext = this.statements;
+    if(diceStringNext){
+      this.statementsNext = compileStatements(`${diceString}+${diceStringNext}`);
+      this.stringNext = simplify(this.statementsNext);
+      this.statementsNext = compileStatements(this.stringNext);
+    } //end if
   }
   addNext(diceString){
-    const operator = diceString.includes('-')?'-':'+';
+    const operator = diceString.slice(0,1)==='-'?'-':'+';
 
-    if(this.stringNext.length){
-      this.stringNext = `${this.stringNext}${operator}${diceString.replace(/\-|\+/g,'')}`;
-    }else{
-      this.stringNext = diceString;
-    } //end if
+    this.stringNext = `${this.stringNext}${operator}${diceString}`;
     this.statementsNext = compileStatements(this.stringNext);
     this.stringNext = simplify(this.statementsNext);
     this.statementsNext = compileStatements(this.stringNext);
@@ -95,10 +102,11 @@ export class Dice{
   add(diceString){
     const operator = diceString.includes('-')?'-':'+';
 
-    this.string = `${this.string}${operator}${diceString.replace(/\-|\+/g,'')}`;
+    this.string = `${this.string}${operator}${diceString}`;
     this.statements = compileStatements(this.string);
     this.string = simplify(this.statements);
     this.statements = compileStatements(this.string);
+    this.addNext(diceString); //reflect base changes to next roll as well
   }
   subtract(diceString){
     this.add(`-${diceString}`);
@@ -135,8 +143,8 @@ export class Dice{
 
         result+=(statement.type==='add'?1:-1)*randomInteger(min,max);
       });
-      this.statementsNext = null;
-      this.stringNext = '';
+      this.stringNext = this.string;
+      this.statementsNext = this.statements;
     } //end if
     return result;
   }

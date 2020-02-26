@@ -2,9 +2,34 @@
 main
   section.section
     .container.margin-bottom
-      h1.title Dice
-      hr
-      h3.subtitle Battle Analysis Demo
+      h1.title Usage Examples
+    .container.content
+      p Basic Creation
+      pre.
+        const myDice = new Dice('1d6');
+      p Basic Updating
+      pre.
+        myDice.addNext('1d4')
+        // myDice.string === '1d6'
+        // myDice.stringNext === '1d6+1d4'
+        myDice.subtractNext('1d4')
+        // myDice.string === '1d6'
+        // myDice.stringNext === '1d6'
+        myDice.subtractNext('1d4')
+        // myDice.string === '1d6'
+        // myDice.stringNext === '1d6-1d4'
+        myDice.add('4')
+        // myDice.string === '1d6+4'
+        // myDice.stringNext === '1d6+4-1d4'
+        myDice.subtract('1')
+        // myDice.string === '1d6+3'
+        // myDice.stringNext === '1d6+3-1d4'
+        const result = myDice.roll();
+        // myDice.string === '1d6+3'
+        // myDice.stringNext ==='1d6+3'
+  section.section
+    .container.margin-bottom
+      h1.title Battle Analysis Demo
     .container.content
       .field
         .label Player Damage
