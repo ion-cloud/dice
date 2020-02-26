@@ -24,6 +24,9 @@ main
         myDice.subtract('1')
         // myDice.string === '1d6+3'
         // myDice.stringNext === '1d6+3-1d4'
+        myDice.subtractNext('3-1d4')
+        // myDice.string === '1d6+3'
+        // myDice.stringNext === '1d6'
         const result = myDice.roll();
         // myDice.string === '1d6+3'
         // myDice.stringNext ==='1d6+3'

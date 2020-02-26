@@ -18,5 +18,14 @@ myDice.subtract('1d4');
 myDice.subtract('1d10')
 console.log(myDice.string);
 // -> 17+1d4+3d12-1d10
+myDice.addNext('1d2+3d4-1d6');
+
+// addNext & subtractNext only affect the next rolls
+// stringNext on `myDice` will show what the potential next roll will be
+console.log(myDice.stringNext);
+// -> 17+4d4+3d12-1d10+1d2-1d6
+myDice.subtractNext('17+4d4+3d12-1d10+1d2');
+console.log(myDice.stringNext);
+// -> -1d6
 ```
 Please see code example [here](https://github.com/ion-cloud/dice/blob/master/demo/src/App.vue).
