@@ -1,5 +1,5 @@
 function randomInteger(min,max){
-  return Math.floor(Math.random()*(max-min))+min;
+  return Math.round(Math.random()*(max-min))+min;
 } //end randomInteger()
 
 function simplify(statements){
@@ -77,11 +77,8 @@ export class Dice{
     this.statements = compileStatements(diceString);
     this.string = simplify(this.statements);
     this.statements = compileStatements(this.string);
-
-    // by default if no additional operations will perform on next computation
-    // then we will assume the instances basic string and statements
-    this.stringNext = this.string;
-    this.statementsNext = this.statements;
+    this.stringNext = '';
+    this.statementsNext = [];
     if(diceStringNext){
       this.statementsNext = compileStatements(`${diceString}+${diceStringNext}`);
       this.stringNext = simplify(this.statementsNext);
@@ -145,8 +142,8 @@ export class Dice{
 
         result+=(statement.type==='add'?1:-1)*randomInteger(min,max);
       });
-      this.stringNext = this.string;
-      this.statementsNext = this.statements;
+      this.stringNext = '';
+      this.statementsNext = [];
     } //end if
     return result;
   }

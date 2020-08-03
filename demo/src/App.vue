@@ -132,7 +132,7 @@ export default {
       this.damageChart = {
         title: {text: 'Damage Results Randomly Calculated'},
         credits: false,
-        xAxis: {categories,title:{text: 'Beginning to End of Battle'}},
+        xAxis: {categories:categories.map((_,i)=> i),title:{text: 'Rounds'}},
         yAxis: {title: {text: 'Damage Amount'}},
         series: [
           {name: 'Player', data: dataPlayerDamage},
